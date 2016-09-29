@@ -3,7 +3,6 @@ package com.topjohnwu.magisk.module;
 import android.os.AsyncTask;
 
 import com.topjohnwu.magisk.utils.Logger;
-import com.topjohnwu.magisk.utils.ModuleHelper;
 import com.topjohnwu.magisk.utils.Utils;
 
 public class Module extends BaseModule {
@@ -29,9 +28,21 @@ public class Module extends BaseModule {
 
         Logger.dev("Creating Module, id: " + mId);
 
-        mEnable = !Utils.itemExist(mDisableFile);
-        mRemove = Utils.itemExist(mRemoveFile);
-        mUpdated = Utils.itemExist(mUpdateFile);
+        try {
+            mEnable = !Utils.itemExist(mDisableFile);
+        } catch (Exception e) {
+            mEnable = false;
+        }
+        try {
+            mRemove = Utils.itemExist(mRemoveFile);
+        } catch (Exception e) {
+            mRemove = false;
+        }
+        try {
+            mUpdated = Utils.itemExist(mUpdateFile);
+        } catch (Exception e) {
+            mUpdated = false;
+        }
 
     }
 

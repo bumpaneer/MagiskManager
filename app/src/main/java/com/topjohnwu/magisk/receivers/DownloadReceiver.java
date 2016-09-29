@@ -10,12 +10,10 @@ import android.widget.Toast;
 
 import com.topjohnwu.magisk.R;
 
-import java.io.File;
-
 public abstract class DownloadReceiver extends BroadcastReceiver {
     public Context mContext;
-    long downloadID;
     public String mName;
+    long downloadID;
 
     public DownloadReceiver() {}
 

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,13 +20,12 @@ import java.util.List;
 import java.util.Set;
 
 public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
+    public SharedPreferences prefs;
     private List<ApplicationInfo> appsList = null;
     private Context context;
     private PackageManager packageManager;
-    public SharedPreferences prefs;
 
-    public ApplicationAdapter(Context context, int textViewResourceId,
-                              List<ApplicationInfo> appsList) {
+    public ApplicationAdapter(Context context, int textViewResourceId, List<ApplicationInfo> appsList) {
         super(context, textViewResourceId, appsList);
         this.context = context;
         this.appsList = appsList;
@@ -48,40 +48,42 @@ public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
     }
 
 
+    @NonNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = convertView;
-
+    public View getView(int position, View view, @NonNull ViewGroup parent) {
+        VH holder;
         prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        if (null == view) {
-            LayoutInflater layoutInflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            view = layoutInflater.inflate(R.layout.list_item_app, null);
+
+        if (view == null) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            view = inflater.inflate(R.layout.list_item_app, null);
+
+            holder = new VH();
+            holder.appName = (TextView) view.findViewById(R.id.app_name);
+            holder.packageName = (TextView) view.findViewById(R.id.app_paackage);
+            holder.iconView = (ImageView) view.findViewById(R.id.app_icon);
+            holder.statusView = (CheckBox) view.findViewById(R.id.checkbox);
+
+            view.setTag(holder);
+        } else {
+            holder = (VH) view.getTag();
         }
 
         ApplicationInfo applicationInfo = appsList.get(position);
-        if (null != applicationInfo) {
-            TextView appName = (TextView) view.findViewById(R.id.app_name);
-            TextView packageName = (TextView) view.findViewById(R.id.app_paackage);
-            ImageView iconview = (ImageView) view.findViewById(R.id.app_icon);
-            CheckBox statusview = (CheckBox) view.findViewById(R.id.checkbox);
-            appName.setText(applicationInfo.loadLabel(packageManager));
-            packageName.setText(applicationInfo.packageName);
-            iconview.setImageDrawable(applicationInfo.loadIcon(packageManager));
-            if (CheckApp(applicationInfo.packageName)) {
-                statusview.setChecked(true);
-            } else {
-                statusview.setChecked(false);
-            }
-        }
+        if (applicationInfo == null) return view;
+
+        holder.appName.setText(applicationInfo.loadLabel(packageManager));
+        holder.packageName.setText(applicationInfo.packageName);
+        holder.iconView.setImageDrawable(applicationInfo.loadIcon(packageManager));
+        holder.statusView.setChecked(CheckApp(applicationInfo.packageName));
+
         return view;
     }
 
     public void UpdateRootStatusView(int position, View convertView) {
         View view = convertView;
         if (null == view) {
-            LayoutInflater layoutInflater = (LayoutInflater) context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = layoutInflater.inflate(R.layout.list_item_app, null);
         }
         ApplicationInfo applicationInfo = appsList.get(position);
@@ -97,18 +99,21 @@ public class ApplicationAdapter extends ArrayAdapter<ApplicationInfo> {
     }
 
     private boolean CheckApp(String appToCheck) {
-        boolean starter = false;
         Set<String> set = prefs.getStringSet("auto_blacklist", null);
         if (set != null) {
             for (String string : set) {
                 if (string.equals(appToCheck)) {
-                    starter = true;
+                    return true;
                 }
             }
         }
+        return false;
+    }
 
-        return starter;
-
+    private static class VH {
+        TextView appName, packageName;
+        ImageView iconView;
+        CheckBox statusView;
     }
 
 }

@@ -46,19 +46,22 @@ public class Async {
             String busybox = mContext.getApplicationInfo().dataDir + "/lib/libbusybox.so";
             String zip = mContext.getApplicationInfo().dataDir + "/lib/libzip.so";
             if (Shell.rootAccess()) {
-                if (!Utils.itemExist(toolPath)) {
-                    Shell.sh(
-                            "rm -rf " + toolPath,
-                            "mkdir " + toolPath,
-                            "chmod 755 " + toolPath,
-                            "cd " + toolPath,
-                            "ln -s " + busybox + " busybox",
-                            "for tool in $(./busybox --list); do",
-                            "ln -s " + busybox + " $tool",
-                            "done",
-                            "rm -f su sh",
-                            "ln -s " + zip + " zip"
-                    );
+                try {
+                    if (!Utils.itemExist(toolPath)) {
+                        Shell.sh(
+                                "rm -rf " + toolPath,
+                                "mkdir " + toolPath,
+                                "chmod 755 " + toolPath,
+                                "cd " + toolPath,
+                                "ln -s " + busybox + " busybox",
+                                "for tool in $(./busybox --list); do",
+                                "ln -s " + busybox + " $tool",
+                                "done",
+                                "rm -f su sh",
+                                "ln -s " + zip + " zip"
+                        );
+                    }
+                } catch (Exception ignored) {
                 }
             }
 
@@ -149,10 +152,10 @@ public class Async {
 
     public static class FlashZIP extends AsyncTask<Void, Void, Integer> {
 
-        private String mName;
         protected Uri mUri;
-        private ProgressDialog progress;
         protected File mFile, sdFile;
+        private String mName;
+        private ProgressDialog progress;
         private Context mContext;
         private boolean copyToSD;
 

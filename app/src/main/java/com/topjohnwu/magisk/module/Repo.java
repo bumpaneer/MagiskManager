@@ -1,18 +1,9 @@
 package com.topjohnwu.magisk.module;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.util.Log;
 
 import com.topjohnwu.magisk.R;
-import com.topjohnwu.magisk.utils.ModuleHelper;
-import com.topjohnwu.magisk.utils.Utils;
 import com.topjohnwu.magisk.utils.WebRequest;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.util.Date;
 

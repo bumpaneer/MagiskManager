@@ -7,8 +7,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,15 +26,13 @@ import butterknife.ButterKnife;
 
 public class ReposFragment extends Fragment {
 
+    @BindView(R.id.recyclerView) RecyclerView recyclerView;
+    @BindView(R.id.empty_rv) TextView emptyTv;
+    @BindView(R.id.swipeRefreshLayout) SwipeRefreshLayout mSwipeRefreshLayout;
     private List<Repo> mListRepos = new ArrayList<>();
     private List<Repo> mUpdateRepos = new ArrayList<>();
     private List<Repo> mInstalledRepos = new ArrayList<>();
     private List<Repo> mOthersRepos = new ArrayList<>();
-
-    @BindView(R.id.recyclerView) RecyclerView recyclerView;
-    @BindView(R.id.empty_rv) TextView emptyTv;
-    @BindView(R.id.swipeRefreshLayout) SwipeRefreshLayout mSwipeRefreshLayout;
-
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
     private SharedPreferences prefs;
 
@@ -81,7 +77,6 @@ public class ReposFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().setTitle(R.string.downloads);
         prefs.registerOnSharedPreferenceChangeListener(listener);
     }
 

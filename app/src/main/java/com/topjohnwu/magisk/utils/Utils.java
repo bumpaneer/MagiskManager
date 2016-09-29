@@ -64,7 +64,7 @@ public class Utils {
         Shell.su("PATH=" + toolPath + ":$PATH");
     }
 
-    public static boolean itemExist(String path) {
+    public static boolean itemExist(String path) throws Exception {
         List<String> ret;
         String command = "if [ -e " + path + " ]; then echo true; else echo false; fi";
         if (Shell.rootAccess()) {

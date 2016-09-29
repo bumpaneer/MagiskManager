@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String SELECTED_ITEM_ID = "SELECTED_ITEM_ID";
 
     private final Handler mDrawerHandler = new Handler();
-    private String currentTitle;
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.drawer_layout) DrawerLayout drawer;
@@ -63,8 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Snackbar.make(findViewById(android.R.id.content), R.string.no_root_access, Snackbar.LENGTH_LONG).show();
         }
 
-        this.getFragmentManager().addOnBackStackChangedListener(
-                () -> {
+        this.getFragmentManager().addOnBackStackChangedListener(() -> {
                     Fragment hm = getFragmentManager().findFragmentByTag("root");
                     if (hm != null) {
                         if (hm.isVisible()) {
@@ -101,12 +99,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             navigationView.setCheckedItem(R.id.log);
                         }
                     }
-                    hm = getFragmentManager().findFragmentByTag("settings");
-                    if (hm != null) {
-                        if (hm.isVisible()) {
-                            navigationView.setCheckedItem(R.id.settings);
-                        }
-                    }
                 }
         );
 
@@ -132,24 +124,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mSelectedId = savedInstanceState == null ? mSelectedId : savedInstanceState.getInt(SELECTED_ITEM_ID);
         navigationView.setCheckedItem(mSelectedId);
 
-
-        navigationView.setNavigationItemSelectedListener(this);
-
-        Bundle extras = getIntent().getExtras();
-        if (extras != null) {
-            String toLaunch = "";
-            toLaunch = getIntent().getExtras().getString("Relaunch");
-            if (toLaunch.equals("Settings")) {
-                Logger.dev("MainActivity: Intent has extras " + getIntent().getExtras().getString("Relaunch"));
-                mSelectedId = R.id.settings;
-            }
-
+        if (savedInstanceState == null) {
+            mDrawerHandler.removeCallbacksAndMessages(null);
+            mDrawerHandler.postDelayed(() -> navigate(mSelectedId), 250);
         }
 
-
-        mDrawerHandler.removeCallbacksAndMessages(null);
-        navigate(mSelectedId);
-
+        navigationView.setNavigationItemSelectedListener(this);
 
     }
 
@@ -167,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             drawer.closeDrawer(GravityCompat.START);
         } else {
             int backStackEntryCount = getFragmentManager().getBackStackEntryCount();
-            Logger.dev("Welcomeactivity: Entrycount is " + backStackEntryCount);
+            Logger.dev("WelcomeActivity: Entrycount is " + backStackEntryCount);
             if (backStackEntryCount >= 2) {
                 super.onBackPressed();
             } else {
@@ -185,12 +165,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        setTitle(currentTitle);
     }
 
     public void navigate(final int itemId) {
@@ -228,9 +202,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 navFragment = new LogFragment();
                 break;
             case R.id.settings:
-                setTitle(R.string.settings);
-                tag = "settings";
-                navFragment = new SettingsFragment();
+                startActivity(new Intent(this, SettingsActivity.class));
                 break;
             case R.id.app_about:
                 startActivity(new Intent(this, AboutActivity.class));
@@ -238,14 +210,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (navFragment != null) {
-
             FragmentTransaction transaction = getFragmentManager().beginTransaction();
             transaction.setCustomAnimations(android.R.animator.fade_in, android.R.animator.fade_out);
             try {
-                toolbar.setElevation(navFragment instanceof ModulesFragment ? 0 : 10);
-                currentTitle = getTitle().toString();
-
-                transaction.replace(R.id.content_frame, navFragment, tag).addToBackStack(currentTitle).commit();
+                transaction.replace(R.id.content_frame, navFragment, tag).commit();
             } catch (IllegalStateException ignored) {
             }
         }
