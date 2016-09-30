@@ -71,7 +71,6 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static class SettingsFragment extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
-        private CheckBoxPreference quickTilePreference, busyboxPreference;
         private ListPreference themePreference;
 
         @Override
@@ -81,8 +80,8 @@ public class SettingsActivity extends AppCompatActivity {
             PreferenceManager.setDefaultValues(getActivity(), R.xml.uisettings, false);
 
             themePreference = (ListPreference) findPreference("theme");
-            busyboxPreference = (CheckBoxPreference) findPreference("busybox");
-            quickTilePreference = (CheckBoxPreference) findPreference("enable_quicktile");
+            CheckBoxPreference busyboxPreference = (CheckBoxPreference) findPreference("busybox");
+            CheckBoxPreference quickTilePreference = (CheckBoxPreference) findPreference("enable_quicktile");
             busyboxPreference.setChecked(Utils.commandExists("unzip"));
 
             PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
@@ -95,10 +94,12 @@ public class SettingsActivity extends AppCompatActivity {
                 quickTilePreference.setEnabled(false);
                 keepRootOffPreference.setEnabled(false);
                 hideRootNotificationPreference.setEnabled(false);
+                busyboxPreference.setEnabled(false);
             } else {
                 quickTilePreference.setEnabled(true);
                 keepRootOffPreference.setEnabled(true);
                 hideRootNotificationPreference.setEnabled(true);
+                busyboxPreference.setEnabled(true);
             }
         }
 
@@ -180,6 +181,14 @@ public class SettingsActivity extends AppCompatActivity {
                 case "busybox": {
                     boolean checked = sharedPreferences.getBoolean("busybox", false);
                     new Async.LinkBusyBox(checked).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
+                    break;
+                }
+                case "developer_logging": {
+                    Logger.devLog = sharedPreferences.getBoolean("developer_logging", false);
+                    break;
+                }
+                case "shell_logging": {
+                    Logger.logShell = sharedPreferences.getBoolean("shell_logging", false);
                     break;
                 }
             }

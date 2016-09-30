@@ -88,6 +88,7 @@ public class Shell {
                 STDIN.flush();
             } catch (IOException e) {
                 if (!e.getMessage().contains("EPIPE")) {
+                    Logger.dev("Shell: Root shell error...");
                     throw e;
                 }
             }

@@ -71,7 +71,8 @@ public class Utils {
     public static boolean itemExist(boolean root, String path) {
         String command = "if [ -e " + path + " ]; then echo true; else echo false; fi";
         if (Shell.rootAccess() && root) {
-            return Boolean.parseBoolean(Shell.su(command).get(0));
+            List<String> res = Shell.su(command);
+            return !(res == null || res.size() == 0 || res.get(0) == null) && Boolean.parseBoolean(res.get(0));
         } else {
             return new File(path).exists();
         }

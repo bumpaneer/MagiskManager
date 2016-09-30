@@ -46,7 +46,7 @@ public class Async {
             String busybox = mContext.getApplicationInfo().dataDir + "/lib/libbusybox.so";
             String zip = mContext.getApplicationInfo().dataDir + "/lib/libzip.so";
             if (Shell.rootAccess()) {
-                if (!Utils.itemExist(toolPath)) {
+                if (!Utils.itemExist(false, toolPath)) {
                     Shell.sh(
                             "rm -rf " + toolPath,
                             "mkdir " + toolPath,
@@ -149,10 +149,10 @@ public class Async {
 
     public static class FlashZIP extends AsyncTask<Void, Void, Integer> {
 
-        private String mName;
         protected Uri mUri;
-        private ProgressDialog progress;
         protected File mFile, sdFile;
+        private String mName;
+        private ProgressDialog progress;
         private Context mContext;
         private boolean copyToSD;
 
@@ -251,7 +251,13 @@ public class Async {
             }
             // Copy the file to sdcard
             if (copyToSD && mFile != null) {
-                sdFile = new File(Environment.getExternalStorageDirectory() + "/MagiskManager/" + (mName.contains(".zip") ? mName : mName + ".zip").replace(" ", "_"));
+                String filename = (mName.contains(".zip") ? mName : mName + ".zip");
+                filename = filename.replace(" ", "_").replace("'", "").replace("\"", "")
+                        .replace("$", "").replace("`", "").replace("(", "_").replace(")", "_")
+                        .replace("#", "").replace("@", "").replace("*", "");
+                sdFile = new File(Environment.getExternalStorageDirectory() + "/MagiskManager/" + filename);
+                Logger.dev("FlashZip: Copy zip back to " + sdFile.getPath());
+
                 if ((!sdFile.getParentFile().exists() && !sdFile.getParentFile().mkdirs()) || (sdFile.exists() && !sdFile.delete())) {
                     sdFile = null;
                 } else {
@@ -269,7 +275,7 @@ public class Async {
                     }
                 }
                 if (mFile.exists() && !mFile.delete()) {
-                    Shell.su("rm -f " + mFile.getPath());
+                    Utils.removeFile(mFile.getPath());
                 }
             }
             if (ret != null && Boolean.parseBoolean(ret.get(ret.size() - 1))) {
