@@ -1,6 +1,6 @@
 package com.topjohnwu.magisk;
 
-import android.app.ListFragment;
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -8,13 +8,16 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
 
+import com.simplecityapps.recyclerview_fastscroll.views.FastScrollRecyclerView;
+import com.topjohnwu.magisk.module.App;
 import com.topjohnwu.magisk.utils.ApplicationAdapter;
 import com.topjohnwu.magisk.utils.Logger;
+import com.topjohnwu.magisk.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,46 +26,60 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class AutoRootFragment extends ListFragment {
+public class AutoRootFragment extends Fragment implements Utils.ItemClickListener {
 
-    public ListView listView;
+    public FastScrollRecyclerView rcView;
     public SharedPreferences prefs;
 
     private PackageManager packageManager = null;
-    private List<ApplicationInfo> appList = null;
+    private List<App> appList = null;
     private ApplicationAdapter listAdapter = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.auto_root_fragment, container, false);
+        View v = inflater.inflate(R.layout.auto_root_fragment, container, false);
+
+        appList = new ArrayList<>();
+        listAdapter = new ApplicationAdapter(getActivity(), appList, this);
+
+        rcView = (FastScrollRecyclerView) v.findViewById(R.id.recyclerView);
+        rcView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        rcView.setHasFixedSize(true);
+        rcView.setAdapter(listAdapter);
+
+        return v;
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        packageManager = getActivity().getPackageManager();
+
+        int fastScrollColor = getActivity().getResources().getColor(R.color.accent);
+
+        if (prefs.getString("theme", "").equals("Dark")) {
+            fastScrollColor = getActivity().getResources().getColor(R.color.dh_accent);
+        }
+
+        rcView.setPopupBgColor(fastScrollColor);
+        rcView.setThumbColor(fastScrollColor);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        initializeElements();
-    }
-
-    private void initializeElements() {
-        listView = getListView();
-        packageManager = getActivity().getPackageManager();
 
         new LoadApplications().execute();
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
+    public void onItemClick(View view, int position) {
         Logger.dev("Click");
 
-        ApplicationInfo app = appList.get(position);
-        ToggleApp(app.packageName, position, v);
+        App app = appList.get(position);
+        ToggleApp(app.packageName, position, view);
     }
 
     private void ToggleApp(String appToCheck, int position, View v) {
@@ -89,28 +106,26 @@ public class AutoRootFragment extends ListFragment {
 
     }
 
-    private List<ApplicationInfo> checkForLaunchIntent(List<ApplicationInfo> list) {
-        ArrayList<ApplicationInfo> applist = new ArrayList<>();
+    private void checkForLaunchIntent(List<ApplicationInfo> list) {
+        appList.clear();
         for (ApplicationInfo info : list) {
             try {
                 if (null != packageManager.getLaunchIntentForPackage(info.packageName)) {
-                    if (!info.packageName.contains("magisk")) {
-                        applist.add(info);
+                    if (!info.packageName.equals("com.topjohnwu.magisk")) {
+                        appList.add(new App(info, packageManager));
                     }
                 }
             } catch (Exception e) {
                 Logger.dev("AutoRootFragment ->" + e.getMessage());
             }
         }
-        Collections.sort(applist, new CustomComparator());
-
-        return applist;
+        Collections.sort(appList, new CustomComparator());
     }
 
-    public class CustomComparator implements Comparator<ApplicationInfo> {
+    public class CustomComparator implements Comparator<App> {
         @Override
-        public int compare(ApplicationInfo o1, ApplicationInfo o2) {
-            return o1.loadLabel(packageManager).toString().compareToIgnoreCase(o2.loadLabel(packageManager).toString());
+        public int compare(App a1, App a2) {
+            return a1.label.compareToIgnoreCase(a2.label);
         }
     }
 
@@ -118,34 +133,26 @@ public class AutoRootFragment extends ListFragment {
         private ProgressDialog progress = null;
 
         @Override
-        protected Void doInBackground(Void... params) {
-            appList = checkForLaunchIntent(packageManager.getInstalledApplications(PackageManager.GET_META_DATA));
-            listAdapter = new ApplicationAdapter(getActivity(), R.layout.list_item_app, appList);
+        protected void onPreExecute() {
+            super.onPreExecute();
 
+            progress = ProgressDialog.show(getActivity(), null, "Loading application info...");
+        }
+
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            checkForLaunchIntent(packageManager.getInstalledApplications(PackageManager.GET_META_DATA));
             return null;
         }
 
         @Override
-        protected void onCancelled() {
-            super.onCancelled();
-        }
-
-        @Override
         protected void onPostExecute(Void result) {
-            setListAdapter(listAdapter);
-            progress.dismiss();
             super.onPostExecute(result);
+
+            listAdapter.notifyDataSetChanged();
+            progress.dismiss();
         }
 
-        @Override
-        protected void onPreExecute() {
-            progress = ProgressDialog.show(getActivity(), null, "Loading application info...");
-            super.onPreExecute();
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values) {
-            super.onProgressUpdate(values);
-        }
     }
 }

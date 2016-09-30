@@ -93,12 +93,10 @@
                 android:layout_below="@id/description"
                 android:orientation="vertical">
 
-
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:layout_margin="15dip"
                     android:orientation="horizontal">
 
                     <ImageView
@@ -107,8 +105,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/card_imageview_margin"
                         android:layout_marginStart="@dimen/card_imageview_margin"
-                        android:background="@drawable/ic_changelog"
-                        android:backgroundTint="@color/icon_grey"/>
+                        android:background="?android:attr/selectableItemBackground"
+                        android:padding="15dp"
+                        android:src="@drawable/ic_changelog"
+                        android:tint="@color/icon_grey"/>
 
                     <ImageView
                         android:id="@+id/authorLink"
@@ -116,8 +116,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/card_imageview_margin"
                         android:layout_marginStart="@dimen/card_imageview_margin"
-                        android:background="@drawable/ic_author"
-                        android:backgroundTint="@color/icon_grey"/>
+                        android:background="?android:attr/selectableItemBackground"
+                        android:padding="15dp"
+                        android:src="@drawable/ic_person"
+                        android:tint="@color/icon_grey"/>
 
                     <ImageView
                         android:id="@+id/supportLink"
@@ -125,8 +127,10 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/card_imageview_margin"
                         android:layout_marginStart="@dimen/card_imageview_margin"
-                        android:background="@drawable/ic_support"
-                        android:backgroundTint="@color/icon_grey"/>
+                        android:background="?android:attr/selectableItemBackground"
+                        android:padding="15dp"
+                        android:src="@drawable/ic_help"
+                        android:tint="@color/icon_grey"/>
 
                 </LinearLayout>
 
