@@ -46,7 +46,7 @@ public class Async {
             String busybox = mContext.getApplicationInfo().dataDir + "/lib/libbusybox.so";
             String zip = mContext.getApplicationInfo().dataDir + "/lib/libzip.so";
             if (Shell.rootAccess()) {
-                if (!Utils.itemExist(false, toolPath)) {
+                if (!Utils.itemExist(toolPath)) {
                     Shell.sh(
                             "rm -rf " + toolPath,
                             "mkdir " + toolPath,
@@ -203,7 +203,6 @@ public class Async {
             try {
                 InputStream in = mContext.getContentResolver().openInputStream(mUri);
                 mFile = new File(mContext.getCacheDir().getAbsolutePath() + "/install.zip");
-                Utils.removeFile(mFile.getPath());
                 createFileFromInputStream(in, mFile);
                 in.close();
             } catch (FileNotFoundException e) {
@@ -252,12 +251,7 @@ public class Async {
             }
             // Copy the file to sdcard
             if (copyToSD && mFile != null) {
-                String filename = (mName.contains(".zip") ? mName : mName + ".zip");
-                filename = filename.replace(" ", "_").replace("'", "").replace("\"", "")
-                        .replace("$", "").replace("`", "").replace("(", "_").replace(")", "_")
-                        .replace("#", "").replace("@", "").replace("*", "");
-                sdFile = new File(Environment.getExternalStorageDirectory() + "/MagiskManager/" + filename);
-                Logger.dev("FlashZip: Copy zip back to " + sdFile.getPath());
+                sdFile = new File(Environment.getExternalStorageDirectory() + "/MagiskManager/" + (mName.contains(".zip") ? mName : mName + ".zip").replace(" ", "_"));
                 if ((!sdFile.getParentFile().exists() && !sdFile.getParentFile().mkdirs()) || (sdFile.exists() && !sdFile.delete())) {
                     sdFile = null;
                 } else {
@@ -275,7 +269,7 @@ public class Async {
                     }
                 }
                 if (mFile.exists() && !mFile.delete()) {
-                    Utils.removeFile(mFile.getPath());
+                    Shell.su("rm -f " + mFile.getPath());
                 }
             }
             if (ret != null && Boolean.parseBoolean(ret.get(ret.size() - 1))) {
