@@ -17,6 +17,7 @@ import android.widget.ProgressBar;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.topjohnwu.magisk.services.MonitorService;
 import com.topjohnwu.magisk.utils.Logger;
 import com.topjohnwu.magisk.utils.Shell;
 import com.topjohnwu.magisk.utils.Utils;
@@ -33,11 +34,13 @@ public class RootFragment extends Fragment {
 
     @BindView(R.id.progressBar) ProgressBar progressBar;
     @BindView(R.id.rootSwitchView) View rootToggleView;
+    @BindView(R.id.autoRootSwitchView) View autoRootToggleView;
     @BindView(R.id.selinuxSwitchView) View selinuxToggleView;
     @BindView(R.id.rootStatusView) View rootStatusView;
     @BindView(R.id.safetynetStatusView) View safetynetStatusView;
     @BindView(R.id.selinuxStatusView) View selinuxStatusView;
     @BindView(R.id.root_toggle) Switch rootToggle;
+    @BindView(R.id.auto_root_toggle) Switch autoRootToggle;
     @BindView(R.id.selinux_toggle) Switch selinuxToggle;
     @BindView(R.id.root_status_container) View rootStatusContainer;
     @BindView(R.id.root_status_icon) ImageView rootStatusIcon;
@@ -49,17 +52,19 @@ public class RootFragment extends Fragment {
     @BindView(R.id.safety_net_icon) ImageView safetyNetStatusIcon;
 
     int statusOK = R.drawable.ic_check_circle;
+    int statusAuto = R.drawable.ic_autoroot;
     int statusError = R.drawable.ic_error;
     int statusUnknown = R.drawable.ic_help;
 
     private int colorOK, colorFail, colorNeutral, colorWarn;
-    //private boolean autoRootStatus;
+    private boolean autoRootStatus;
     private SharedPreferences.OnSharedPreferenceChangeListener listener;
+    private View view;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.root_fragment, container, false);
+        view = inflater.inflate(R.layout.root_fragment, container, false);
         ButterKnife.bind(this, view);
         int[] attrs0 = {R.attr.ColorOK};
         int[] attrs1 = {R.attr.ColorFail};
@@ -77,9 +82,17 @@ public class RootFragment extends Fragment {
         ta1.recycle();
         ta2.recycle();
         ta3.recycle();
+        autoRootStatus = Utils.autoToggleEnabled(getActivity());
 
         prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
 
+        if (autoRootStatus) {
+            if (!Utils.hasServicePermission(getActivity())) {
+                autoRootStatus = false;
+            }
+        }
+        rootToggle.setEnabled(!autoRootStatus);
+        autoRootToggle.setChecked(autoRootStatus);
         updateUI();
 
         rootToggle.setOnClickListener(toggle -> {
@@ -92,6 +105,19 @@ public class RootFragment extends Fragment {
             }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR, ((CompoundButton) toggle).isChecked());
 
         });
+
+        autoRootToggle.setOnClickListener(toggle -> {
+                    if (!Utils.hasServicePermission(getActivity())) {
+                        Intent intent = new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS);
+                        Toast.makeText(getActivity(), "Please enable accessibility access for Magisk's auto-toggle feature to work.", Toast.LENGTH_LONG).show();
+                        startActivityForResult(intent, 100);
+                    } else {
+                        toggleAutoRoot(autoRootToggle.isChecked());
+
+                    }
+                }
+
+        );
 
         selinuxToggle.setOnClickListener(toggle -> {
 
@@ -117,8 +143,10 @@ public class RootFragment extends Fragment {
         super.onResume();
         getActivity().setTitle(R.string.root);
         listener = (pref, key) -> {
+
             if ((key.contains("autoRootEnable")) || (key.equals("root"))) {
                 Logger.dev("RootFragmnet, keychange detected for " + key);
+                //new updateUI().execute();
                 updateUI();
             }
 
@@ -133,7 +161,45 @@ public class RootFragment extends Fragment {
         prefs.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        Log.d("Magisk", "Got result: " + requestCode + " and " + resultCode);
+        if (requestCode == 100) {
+            if (Utils.hasServicePermission(getActivity())) {
+                toggleAutoRoot(true);
+                Snackbar.make(view, getActivity().getString(R.string.auto_toggle) + " has been enabled.", Snackbar.LENGTH_LONG).show();
+
+            } else {
+                autoRootToggle.setChecked(false);
+                Snackbar.make(view, getActivity().getString(R.string.auto_toggle) + " disabled, permissions required.", Snackbar.LENGTH_LONG).show();
+            }
+
+        }
+    }
+
+    private void toggleAutoRoot(boolean toggleState) {
+        autoRootStatus = toggleState;
+        Utils.toggleAutoRoot(toggleState, getActivity());
+        if (toggleState) {
+            Intent myIntent = new Intent(getActivity(), MonitorService.class);
+            getActivity().startService(myIntent);
+            rootToggle.setEnabled(false);
+            boolean boo = Utils.isMyServiceRunning(MonitorService.class, getActivity());
+            if (boo) {
+                Intent myServiceIntent = new Intent(getActivity(), MonitorService.class);
+                getActivity().startService(myServiceIntent);
+            }
+        } else {
+            Intent myIntent = new Intent(getActivity(), MonitorService.class);
+            getActivity().stopService(myIntent);
+            rootToggle.setEnabled(true);
+        }
+
+    }
+
     private void updateUI() {
+        autoRootToggle.setChecked(autoRootStatus);
         progressBar.setVisibility(View.GONE);
         rootStatusView.setVisibility(View.VISIBLE);
         safetynetStatusView.setVisibility(View.VISIBLE);
@@ -141,6 +207,7 @@ public class RootFragment extends Fragment {
 
         if (Shell.rootAccess()) {
             rootToggleView.setVisibility(View.VISIBLE);
+            autoRootToggleView.setVisibility(View.VISIBLE);
             selinuxToggleView.setVisibility(View.VISIBLE);
         }
 
@@ -196,27 +263,40 @@ public class RootFragment extends Fragment {
                 break;
             case 1:
                 // Proper root
-                rootToggle.setEnabled(true);
-                if (Utils.rootEnabled()) {
-                    // Mounted
-                    rootStatusContainer.setBackgroundColor(colorWarn);
-                    rootStatusIcon.setImageResource(statusError);
-                    rootStatus.setTextColor(colorWarn);
-                    rootStatus.setText(R.string.root_enabled);
-                    rootToggle.setChecked(true);
-                    safetyNetStatusIcon.setImageResource(statusError);
-                    safetyNetStatus.setText(R.string.root_enabled_info);
+                if (autoRootStatus) {
+                    rootStatusContainer.setBackgroundColor(colorOK);
+                    rootStatusIcon.setImageResource(statusAuto);
+                    rootStatusIcon.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+                    rootStatus.setTextColor(colorOK);
+                    rootStatus.setText(R.string.root_auto_unmounted);
+                    rootToggle.setEnabled(false);
+                    autoRootToggle.setChecked(true);
+                    safetyNetStatusIcon.setImageResource(statusOK);
+                    safetyNetStatus.setText(R.string.root_auto_unmounted_info);
                     break;
                 } else {
-                    // Disabled
-                    rootStatusContainer.setBackgroundColor(colorOK);
-                    rootStatusIcon.setImageResource(statusOK);
-                    rootStatus.setTextColor(colorOK);
-                    rootStatus.setText(R.string.root_disabled);
-                    rootToggle.setChecked(false);
-                    safetyNetStatusIcon.setImageResource(statusOK);
-                    safetyNetStatus.setText(R.string.root_disabled_info);
-                    break;
+                    rootToggle.setEnabled(true);
+                    if (Utils.rootEnabled()) {
+                        // Mounted
+                        rootStatusContainer.setBackgroundColor(colorWarn);
+                        rootStatusIcon.setImageResource(statusError);
+                        rootStatus.setTextColor(colorWarn);
+                        rootStatus.setText(R.string.root_enabled);
+                        rootToggle.setChecked(true);
+                        safetyNetStatusIcon.setImageResource(statusError);
+                        safetyNetStatus.setText(R.string.root_enabled_info);
+                        break;
+                    } else {
+                        // Disabled
+                        rootStatusContainer.setBackgroundColor(colorOK);
+                        rootStatusIcon.setImageResource(statusOK);
+                        rootStatus.setTextColor(colorOK);
+                        rootStatus.setText(R.string.root_disabled);
+                        rootToggle.setChecked(false);
+                        safetyNetStatusIcon.setImageResource(statusOK);
+                        safetyNetStatus.setText(R.string.root_disabled_info);
+                        break;
+                    }
                 }
             case 2:
                 // Improper root
@@ -227,6 +307,7 @@ public class RootFragment extends Fragment {
                 rootToggle.setChecked(true);
                 safetyNetStatusIcon.setImageResource(statusError);
                 safetyNetStatus.setText(R.string.root_system_info);
+                autoRootToggleView.setVisibility(View.GONE);
                 rootToggleView.setVisibility(View.GONE);
                 selinuxToggleView.setVisibility(View.GONE);
                 break;
