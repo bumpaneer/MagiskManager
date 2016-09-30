@@ -7,13 +7,9 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 
-import com.topjohnwu.magisk.services.MonitorService;
 import com.topjohnwu.magisk.utils.Async;
 import com.topjohnwu.magisk.utils.Logger;
 import com.topjohnwu.magisk.utils.Utils;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class SplashActivity extends AppCompatActivity {
     @Override
@@ -28,7 +24,7 @@ public class SplashActivity extends AppCompatActivity {
         Logger.devLog = defaultPrefs.getBoolean("developer_logging", false);
         Logger.logShell = defaultPrefs.getBoolean("shell_logging", false);
 
-        // Set up default preferences,make sure we add "extra" blacklist entries.
+        /*// Set up default preferences,make sure we add "extra" blacklist entries.
         if (!defaultPrefs.contains("auto_blacklist")) {
             Logger.dev("SplashActivity: Setting default preferences for application");
             SharedPreferences.Editor editor = defaultPrefs.edit();
@@ -59,7 +55,7 @@ public class SplashActivity extends AppCompatActivity {
 
         // Set up quick settings tile
         Utils.setupQuickSettingsTile(getApplicationContext());
-
+*/
         // Initialize
         Utils.init(this);
 
@@ -67,6 +63,7 @@ public class SplashActivity extends AppCompatActivity {
                 .putBoolean("module_done", false)
                 .putBoolean("repo_done", false)
                 .putBoolean("update_check_done", false)
+                .putBoolean("root", Utils.rootEnabled())
                 .apply();
 
         new Async.CheckUpdates(this).executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);

@@ -1,41 +1,27 @@
 package com.topjohnwu.magisk.utils;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
-import android.text.TextUtils;
 import android.util.Base64;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-import com.kcoppock.broadcasttilesupport.BroadcastTileIntentBuilder;
 import com.topjohnwu.magisk.MagiskFragment;
 import com.topjohnwu.magisk.R;
 import com.topjohnwu.magisk.receivers.DownloadReceiver;
-import com.topjohnwu.magisk.receivers.PrivateBroadcastReceiver;
-import com.topjohnwu.magisk.services.MonitorService;
-import com.topjohnwu.magisk.services.TileServiceCompat;
-import com.topjohnwu.magisk.services.TileServiceNewApi;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.crypto.BadPaddingException;
@@ -89,12 +75,12 @@ public class Utils {
         return commandExists("su");
     }
 
-    public static boolean autoToggleEnabled(Context context) {
+    /*public static boolean autoToggleEnabled(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         Logger.dev("Utils: AutoRootEnableCheck is " + preferences.getBoolean("autoRootEnable", false));
         return PreferenceManager.getDefaultSharedPreferences(context).getBoolean("autoRootEnable", false);
 
-    }
+    }*/
 
     public static boolean createFile(String path) {
         String command = "touch " + path + " 2>/dev/null; if [ -f " + path + " ]; then echo true; else echo false; fi";
@@ -113,14 +99,14 @@ public class Utils {
             } else {
                 Shell.su("rm -rf /magisk/.core/bin", "setprop magisk.root 0");
             }
-            if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("enable_quicktile", false)) {
+            /*if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("enable_quicktile", false)) {
                 setupQuickSettingsTile(context);
-            }
+            }*/
             PreferenceManager.getDefaultSharedPreferences(context).edit().putBoolean("root", b).apply();
         }
     }
 
-    public static void toggleAutoRoot(Boolean b, Context context) {
+    /*public static void toggleAutoRoot(Boolean b, Context context) {
         Logger.dev("Utils: toggleAutocalled for " + b );
         if (MagiskFragment.magiskVersion != -1) {
             if (!Utils.hasServicePermission(context)) {
@@ -143,7 +129,7 @@ public class Utils {
         if (PreferenceManager.getDefaultSharedPreferences(context).getBoolean("enable_quicktile", false)) {
             setupQuickSettingsTile(context);
         }
-    }
+    }*/
 
     static List<String> getModList(String path) {
         List<String> ret;
@@ -208,6 +194,8 @@ public class Utils {
         }
         return secret;
     }
+
+    /*
 
     public static void setupQuickSettingsTile(Context mContext) {
         Logger.dev("Utils: SetupQuickSettings called");
@@ -397,6 +385,8 @@ public class Utils {
         }
         return false;
     }
+
+    */
 
     public interface ItemClickListener {
 

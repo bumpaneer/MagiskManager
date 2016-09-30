@@ -24,20 +24,11 @@
             android:id="@+id/log"
             android:icon="@drawable/ic_bug_report"
             android:title="@string/log"/>
-    </group>
-
-    <group
-        android:checkableBehavior="single">
 
         <item
             android:id="@+id/root"
             android:icon="@drawable/root"
             android:title="@string/root"/>
-
-        <item
-            android:id="@+id/autoroot"
-            android:icon="@drawable/ic_autoroot"
-            android:title="@string/auto_toggle"/>
 
     </group>
 

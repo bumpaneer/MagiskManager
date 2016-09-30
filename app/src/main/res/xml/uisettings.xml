@@ -1,67 +1,67 @@
 <PreferenceScreen
-    android:layout_marginTop="?attr/actionBarSize"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_marginTop="?attr/actionBarSize">
     <PreferenceCategory
         android:title="@string/settings_general_category">
 
         <ListPreference
-            android:key="theme"
-            android:title="@string/settings_theme_title"
-            android:summary="@string/settings_theme_summary"
             android:defaultValue="Default"
             android:entries="@array/themes"
-            android:entryValues="@array/themes"/>
+            android:entryValues="@array/themes"
+            android:key="theme"
+            android:summary="@string/settings_theme_summary"
+            android:title="@string/settings_theme_title"/>
 
         <CheckBoxPreference
+            android:defaultValue="false"
             android:key="busybox"
-            android:defaultValue="false"
-            android:title="@string/settings_busybox_title"
-            android:summary="@string/settings_busybox_summary" />
+            android:summary="@string/settings_busybox_summary"
+            android:title="@string/settings_busybox_title"/>
 
     </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/settings_quicksettings_category">
+    <!--    <PreferenceCategory
+            android:title="@string/settings_quicksettings_category">
 
-        <CheckBoxPreference
-            android:key="enable_quicktile"
-            android:defaultValue="false"
-            android:title="@string/settings_enable_quicktile_title"
-            android:summary="@string/settings_enable_quicktile_summary" />
+            <CheckBoxPreference
+                android:key="enable_quicktile"
+                android:defaultValue="false"
+                android:title="@string/settings_enable_quicktile_title"
+                android:summary="@string/settings_enable_quicktile_summary" />
 
-    </PreferenceCategory>
+        </PreferenceCategory>
 
-    <PreferenceCategory
-        android:title="@string/settings_root_category">
+        <PreferenceCategory
+            android:title="@string/settings_root_category">
 
-        <CheckBoxPreference
-            android:key="keep_root_off"
-            android:defaultValue="false"
-            android:title="@string/settings_keep_root_off_title"
-            android:summary="@string/settings_keep_root_off_summary" />
+            <CheckBoxPreference
+                android:key="keep_root_off"
+                android:defaultValue="false"
+                android:title="@string/settings_keep_root_off_title"
+                android:summary="@string/settings_keep_root_off_summary" />
 
-        <CheckBoxPreference
-            android:key="hide_root_notification"
-            android:defaultValue="false"
-            android:title="@string/settings_hide_root_notification_title"
-            android:summary="@string/settings_hide_root_notification_summary" />
+            <CheckBoxPreference
+                android:key="hide_root_notification"
+                android:defaultValue="false"
+                android:title="@string/settings_hide_root_notification_title"
+                android:summary="@string/settings_hide_root_notification_summary" />
 
-    </PreferenceCategory>
+        </PreferenceCategory>-->
 
     <PreferenceCategory
         android:title="@string/settings_development_category">
 
         <CheckBoxPreference
-            android:key="developer_logging"
             android:defaultValue="false"
-            android:title="@string/settings_developer_logging_title"
-            android:summary="@string/settings_developer_logging_summary" />
+            android:key="developer_logging"
+            android:summary="@string/settings_developer_logging_summary"
+            android:title="@string/settings_developer_logging_title"/>
 
         <CheckBoxPreference
-            android:key="shell_logging"
             android:defaultValue="false"
-            android:title="@string/settings_shell_logging_title"
-            android:summary="@string/settings_shell_logging_summary" />
+            android:key="shell_logging"
+            android:summary="@string/settings_shell_logging_summary"
+            android:title="@string/settings_shell_logging_title"/>
 
     </PreferenceCategory>
 

@@ -12,7 +12,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.topjohnwu.magisk.utils.Async;
 import com.topjohnwu.magisk.utils.Logger;
@@ -81,24 +80,24 @@ public class SettingsActivity extends AppCompatActivity {
 
             themePreference = (ListPreference) findPreference("theme");
             CheckBoxPreference busyboxPreference = (CheckBoxPreference) findPreference("busybox");
-            CheckBoxPreference quickTilePreference = (CheckBoxPreference) findPreference("enable_quicktile");
+            // CheckBoxPreference quickTilePreference = (CheckBoxPreference) findPreference("enable_quicktile");
             busyboxPreference.setChecked(Utils.commandExists("unzip"));
 
             PreferenceManager.getDefaultSharedPreferences(getActivity()).registerOnSharedPreferenceChangeListener(this);
-            CheckBoxPreference keepRootOffPreference = (CheckBoxPreference) findPreference("keep_root_off");
-            CheckBoxPreference hideRootNotificationPreference = (CheckBoxPreference) findPreference("hide_root_notification");
+            // CheckBoxPreference keepRootOffPreference = (CheckBoxPreference) findPreference("keep_root_off");
+            //CheckBoxPreference hideRootNotificationPreference = (CheckBoxPreference) findPreference("hide_root_notification");
 
             themePreference.setSummary(themePreference.getValue());
 
             if (MagiskFragment.magiskVersion == -1) {
-                quickTilePreference.setEnabled(false);
+                /*quickTilePreference.setEnabled(false);
                 keepRootOffPreference.setEnabled(false);
-                hideRootNotificationPreference.setEnabled(false);
+                hideRootNotificationPreference.setEnabled(false);*/
                 busyboxPreference.setEnabled(false);
             } else {
-                quickTilePreference.setEnabled(true);
+                /*quickTilePreference.setEnabled(true);
                 keepRootOffPreference.setEnabled(true);
-                hideRootNotificationPreference.setEnabled(true);
+                hideRootNotificationPreference.setEnabled(true);*/
                 busyboxPreference.setEnabled(true);
             }
         }
@@ -139,7 +138,7 @@ public class SettingsActivity extends AppCompatActivity {
                     Logger.dev("SettingsFragment: theme is " + pref);
 
                     break;
-                case "enable_quicktile": {
+                /*case "enable_quicktile": {
                     boolean checked = sharedPreferences.getBoolean("enable_quicktile", false);
                     if (checked) {
                         new AsyncTask<Void, Void, Boolean>() {
@@ -177,7 +176,7 @@ public class SettingsActivity extends AppCompatActivity {
                         }.executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);
                     }
                     break;
-                }
+                }*/
                 case "busybox": {
                     boolean checked = sharedPreferences.getBoolean("busybox", false);
                     new Async.LinkBusyBox(checked).executeOnExecutor(AsyncTask.SERIAL_EXECUTOR);

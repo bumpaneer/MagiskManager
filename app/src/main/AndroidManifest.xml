@@ -22,7 +22,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <service
+        <!--<service
             android:name=".services.MonitorService"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
@@ -56,7 +56,7 @@
                 <action android:name="com.topjohnwu.magisk.CUSTOMTILE_ACTION_DISABLEROOT" />
                 <action android:name="com.topjohnwu.magisk.CUSTOMTILE_ACTION_ENABLEROOT" />
             </intent-filter>
-        </receiver>
+        </receiver>-->
 
         <activity
             android:name=".MainActivity"
@@ -117,11 +117,11 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-        <receiver android:name=".receivers.AutoStartReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
+        <!-- <receiver android:name=".receivers.AutoStartReceiver">
+             <intent-filter>
+                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+             </intent-filter>
+         </receiver>-->
 
 
     </application>
